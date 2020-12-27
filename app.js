@@ -16,6 +16,7 @@ game.setAttribute('height', 400);
 game.setAttribute('width', 500);
 game.style.backgroundColor = 'darkred';
 
+// TODO audit Character properties
 function Character(x, y, color, width, height) {
   this.x = x;
   this.y = y;
@@ -44,7 +45,6 @@ function detectCollision(obj) {
 };
 
 function jump() {
-  // prevent infinite jump
   // adding the check for !cactus.jumping prevents stutter jump
   if (!cactus.sliding && !cactus.jumping) {
     cactus.jumping = true;
@@ -55,6 +55,9 @@ function jump() {
 };
 
 function slide() {
+  // TODO devise lateral movement logic
+  // move forward slightly, then 
+  // update() will pull back towards initial location
   if (!cactus.sliding && !cactus.jumping) {
     cactus.sliding = true;
     cactus.y += cactus.height / 2;
@@ -100,11 +103,13 @@ function update() {
     slide(); 
   }
   if (keys.ArrowRight) {
+    // TODO if moving right, speed up the scroll of background/enemies
     if (cactus.x < cactus.maxX) {
       cactus.x += cactus.velX;
     }
   }
   if (keys.ArrowLeft) {
+    // TODO if moving left, slightly slow the scroll
     if (cactus.x > 0) {
       cactus.x -= cactus.velX;
     }
