@@ -52,47 +52,55 @@ function detectCollision(obj) {
 
 }
 
-function gameLoop() {
-  ctx.clearRect(0, 0, game.width, game.height);
-  cactus.update();
-  cactus.draw();
-};
+function jump() {
+  cactus.jumping = true;
+  while (cactus.y > cactus.maxJump) {
+    cactus.y -= cactus.velY;
+  }
+}
+
+function slide() {
+  if (cactus.sliding !== true && cactus.jumping === false) {
+    cactus.sliding = true;
+    cactus.y += cactus.height / 2;
+    [cactus.width, cactus.height] = [cactus.height, cactus.width];
+    setTimeout(() => {
+      cactus.sliding = false;
+      cactus.y -= cactus.height;
+      [cactus.height, cactus.width] = [cactus.width, cactus.height];
+    }, 500)
+  }
+}
 
 function keydownHandler(e) {
   switch(e.code) {
     case('ArrowUp'):
-      cactus.jumping = true;
-      while (cactus.y > cactus.maxJump) {
-        cactus.y -= cactus.velY;
-      }
+      jump();
       break
+
     case('ArrowRight'):
-      if (cactus.x < cactus.maxX) {
-        cactus.x += cactus.velX;
-      }
+      if (cactus.x < cactus.maxX) cactus.x += cactus.velX;
       break
+
     case('ArrowDown'):
-      if (cactus.sliding !== true && cactus.jumping === false) {
-        cactus.sliding = true;
-        cactus.y += cactus.height / 2;
-        [cactus.width, cactus.height] = [cactus.height, cactus.width];
-        setTimeout(() => {
-          cactus.sliding = false;
-          cactus.y -= cactus.height;
-          [cactus.height, cactus.width] = [cactus.width, cactus.height];
-        }, 500)
-      }
+      slide();
       break
+
     case('ArrowLeft'):
-    if (cactus.x > 0) {
-      cactus.x -= cactus.velX;
-    }
+      if (cactus.x > 0) cactus.x -= cactus.velX;
       break
   }
+};
+
+function gameLoop() {
+  ctx.clearRect(0, 0, game.width, game.height);
+  cactus.update();
+  cactus.draw();
+  window.requestAnimationFrame(gameLoop);
 };
 
 document.addEventListener('DOMContentLoaded', function() {
   cactus = new Character(50, game.height - 100, 'green', 50, 100);
   document.addEventListener('keydown', keydownHandler);
-  setInterval(gameLoop, 60);
+  gameLoop();
 });
