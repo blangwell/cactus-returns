@@ -11,7 +11,6 @@ let keys = {
   ArrowLeft: false
 };
 
-
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
 game.style.backgroundColor = 'darkred';
@@ -26,8 +25,8 @@ function Character(x, y, color, width, height) {
   this.velX = 5;
   this.velY = 1;
   this.maxX = game.width / 3;
-  this.maxJump = this.y - 100;
-  this.gravityRate = 5;
+  this.maxJump = this.y - 150;
+  this.gravityRate = 4;
   this.jumping = false;
   this.sliding = false;
   this.draw = function() {
@@ -41,16 +40,24 @@ function menu() {
 };
 
 function detectCollision(obj) {
-
+  
 };
 
 function jump() {
+  // TODO prevent infinite jumping while holding down jump button
   // adding the check for !cactus.jumping prevents stutter jump
   if (!cactus.sliding && !cactus.jumping) {
     cactus.jumping = true;
-    while (cactus.y > cactus.maxJump) {
-      cactus.y -= cactus.velY;
-    }  
+    while (cactus.y >= cactus.maxJump) {
+      cactus.y -= 1;
+    }
+
+    // let jumpAnimation = setInterval(() => {
+    //   cactus.y -= 5;
+    // }, 12)
+    // if (cactus.y <= cactus.maxJump + 1) {
+    //   clearInterval(jumpAnimation)
+    // }
   }
 };
 
@@ -62,30 +69,21 @@ function slide() {
     cactus.sliding = true;
     cactus.y += cactus.height / 2;
     [cactus.width, cactus.height] = [cactus.height, cactus.width];
+    let slideForward = setInterval(() => {
+      if (cactus.x < cactus.maxX) cactus.x += 5;
+    }, 12)
 
     setTimeout(() => {
       cactus.sliding = false;
       cactus.y -= cactus.height;
       [cactus.height, cactus.width] = [cactus.width, cactus.height];
-    }, 600);
+      clearInterval(slideForward)
+    }, 500);
   } 
 };
 
 function keydownHandler(e) {
   keys[e.code] = true;
-
-  if (keys['ArrowUp']) {
-    jump();
-  }
-  if (keys['ArrowRight']) {
-    if (cactus.x < cactus.maxX) cactus.x += cactus.velX;
-  }
-  if (keys['ArrowDown']) {
-    slide();
-  }
-  if (keys['ArrowLeft']) {
-    if (cactus.x > 0) cactus.x -= cactus.velX;
-  }
 };
 
 function keyupHandler(e) {
@@ -120,6 +118,14 @@ function update() {
   } 
   // apply gravity if jumping
   if (cactus.jumping) cactus.y += cactus.gravityRate;
+
+  // slide back towards center of movement area
+  if (!keys.ArrowRight && !cactus.sliding) {
+    setTimeout(() => {
+      if (cactus.x > 50) cactus.x -= 2;
+    }, 200)
+  }
+  
 };
 
 function gameLoop() {
