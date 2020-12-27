@@ -2,6 +2,7 @@ const game = document.getElementById('game');
 const ctx = game.getContext('2d');
 
 let gameOver = true;
+let cactus;
 
 let keys = {
   ArrowUp: false,
@@ -10,7 +11,6 @@ let keys = {
   ArrowLeft: false
 };
 
-let cactus;
 
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
@@ -35,21 +35,13 @@ function Character(x, y, color, width, height) {
   }
 };
 
-function Platform(x, y, color, width, height) {
-  this.x = x;
-  this.y = y;
-  this.color = color;
-  this.width = width;
-  this.height = height;
-}
-
 function menu() {
 
-}
+};
 
 function detectCollision(obj) {
 
-}
+};
 
 function jump() {
   // prevent infinite jump
@@ -60,11 +52,9 @@ function jump() {
       cactus.y -= cactus.velY;
     }  
   }
-}
+};
 
 function slide() {
-  // end slide if jumping is true
-  // tie slide transformation to it's boolean value
   if (!cactus.sliding && !cactus.jumping) {
     cactus.sliding = true;
     cactus.y += cactus.height / 2;
@@ -74,9 +64,9 @@ function slide() {
       cactus.sliding = false;
       cactus.y -= cactus.height;
       [cactus.height, cactus.width] = [cactus.width, cactus.height];
-    }, 1000)
+    }, 600);
   } 
-}
+};
 
 function keydownHandler(e) {
   keys[e.code] = true;
@@ -97,38 +87,37 @@ function keydownHandler(e) {
 
 function keyupHandler(e) {
   keys[e.code] = false;
-}
+};
 
 function update() {
-    // movement logic based on keys object
-    if (keys.ArrowUp) {
-      if (!cactus.jumping && !cactus.sliding) {
-        jump();
-      }
+  // movement logic based on keys object
+  if (keys.ArrowUp) {
+    if (!cactus.jumping && !cactus.sliding) {
+      jump();
     }
-    if (keys.ArrowDown) {
-      slide(); 
-    }
-    if (keys.ArrowRight) {
-      if (cactus.x < cactus.maxX) {
-        cactus.x += cactus.velX;
-      }
-    }
-    if (keys.ArrowLeft) {
-      if (cactus.x > 0) {
-        cactus.x -= cactus.velX;
-      }
-    }
-    // detect floor
-    if (cactus.y + cactus.height >= game.height) {
-      cactus.jumping = false;
-    } 
-    // apply gravity if jumping
-    if (cactus.jumping) cactus.y += cactus.gravityRate;
   }
+  if (keys.ArrowDown) {
+    slide(); 
+  }
+  if (keys.ArrowRight) {
+    if (cactus.x < cactus.maxX) {
+      cactus.x += cactus.velX;
+    }
+  }
+  if (keys.ArrowLeft) {
+    if (cactus.x > 0) {
+      cactus.x -= cactus.velX;
+    }
+  }
+  // detect floor
+  if (cactus.y + cactus.height >= game.height) {
+    cactus.jumping = false;
+  } 
+  // apply gravity if jumping
+  if (cactus.jumping) cactus.y += cactus.gravityRate;
+};
 
 function gameLoop() {
-  // console.log(cactus.sliding)
   ctx.clearRect(0, 0, game.width, game.height);
   cactus.draw();
   update();
