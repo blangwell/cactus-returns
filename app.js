@@ -3,6 +3,13 @@ const ctx = game.getContext('2d');
 
 let gameOver = true;
 
+let keys = {
+  ArrowUp: false,
+  ArrowRight: false,
+  ArrowDown: false,
+  ArrowLeft: false
+};
+
 let cactus;
 
 game.setAttribute('height', 400);
@@ -27,6 +34,15 @@ function Character(x, y, color, width, height) {
     ctx.fillRect(this.x, this.y, this.width, this.height)
   }
   this.update = function() {
+    if (keys.ArrowUp) jump();
+    if (keys.ArrowDown) slide(); 
+    if (keys.ArrowRight) {
+      if (cactus.x < cactus.maxX) cactus.x += cactus.velX;
+    }
+    if (keys.ArrowLeft) {
+      if (cactus.x > 0) cactus.x -= cactus.velX;
+    }
+
     // detect floor
     if (this.y + this.height >= game.height) {
       this.jumping = false;
@@ -60,7 +76,9 @@ function jump() {
 }
 
 function slide() {
-  if (cactus.sliding !== true && cactus.jumping === false) {
+  // end slide if jumping is true
+  // tie slide transformation to it's boolean value
+  if (!cactus.sliding && !cactus.jumping) {
     cactus.sliding = true;
     cactus.y += cactus.height / 2;
     [cactus.width, cactus.height] = [cactus.height, cactus.width];
@@ -69,28 +87,29 @@ function slide() {
       cactus.y -= cactus.height;
       [cactus.height, cactus.width] = [cactus.width, cactus.height];
     }, 500)
-  }
+  } 
 }
 
 function keydownHandler(e) {
-  switch(e.code) {
-    case('ArrowUp'):
-      jump();
-      break
+  keys[e.code] = true;
 
-    case('ArrowRight'):
-      if (cactus.x < cactus.maxX) cactus.x += cactus.velX;
-      break
-
-    case('ArrowDown'):
-      slide();
-      break
-
-    case('ArrowLeft'):
-      if (cactus.x > 0) cactus.x -= cactus.velX;
-      break
+  if (keys['ArrowUp']) {
+    jump();
+  }
+  if (keys['ArrowRight']) {
+    if (cactus.x < cactus.maxX) cactus.x += cactus.velX;
+  }
+  if (keys['ArrowDown']) {
+    slide();
+  }
+  if (keys['ArrowLeft']) {
+    if (cactus.x > 0) cactus.x -= cactus.velX;
   }
 };
+
+function keyupHandler(e) {
+  keys[e.code] = false;
+}
 
 function gameLoop() {
   ctx.clearRect(0, 0, game.width, game.height);
@@ -102,5 +121,6 @@ function gameLoop() {
 document.addEventListener('DOMContentLoaded', function() {
   cactus = new Character(50, game.height - 100, 'green', 50, 100);
   document.addEventListener('keydown', keydownHandler);
+  document.addEventListener('keyup', keyupHandler);
   gameLoop();
 });
