@@ -24,31 +24,14 @@ function Character(x, y, color, width, height) {
   this.height = height;
   this.velX = 5;
   this.velY = 1;
-  this.maxX = game.width / 2;
+  this.maxX = game.width / 3;
   this.maxJump = this.y - 100;
-  this.gravityRate = 10;
+  this.gravityRate = 5;
   this.jumping = false;
   this.sliding = false;
   this.draw = function() {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.width, this.height)
-  }
-  this.update = function() {
-    if (keys.ArrowUp) jump();
-    if (keys.ArrowDown) slide(); 
-    if (keys.ArrowRight) {
-      if (cactus.x < cactus.maxX) cactus.x += cactus.velX;
-    }
-    if (keys.ArrowLeft) {
-      if (cactus.x > 0) cactus.x -= cactus.velX;
-    }
-
-    // detect floor
-    if (this.y + this.height >= game.height) {
-      this.jumping = false;
-    }
-    // apply gravity if jumping
-    if (this.jumping) this.y += this.gravityRate;
   }
 };
 
@@ -69,9 +52,13 @@ function detectCollision(obj) {
 }
 
 function jump() {
-  cactus.jumping = true;
-  while (cactus.y > cactus.maxJump) {
-    cactus.y -= cactus.velY;
+  // prevent infinite jump
+  // adding the check for !cactus.jumping prevents stutter jump
+  if (!cactus.sliding && !cactus.jumping) {
+    cactus.jumping = true;
+    while (cactus.y > cactus.maxJump) {
+      cactus.y -= cactus.velY;
+    }  
   }
 }
 
@@ -82,11 +69,12 @@ function slide() {
     cactus.sliding = true;
     cactus.y += cactus.height / 2;
     [cactus.width, cactus.height] = [cactus.height, cactus.width];
+
     setTimeout(() => {
       cactus.sliding = false;
       cactus.y -= cactus.height;
       [cactus.height, cactus.width] = [cactus.width, cactus.height];
-    }, 500)
+    }, 1000)
   } 
 }
 
@@ -111,10 +99,39 @@ function keyupHandler(e) {
   keys[e.code] = false;
 }
 
+function update() {
+    // movement logic based on keys object
+    if (keys.ArrowUp) {
+      if (!cactus.jumping && !cactus.sliding) {
+        jump();
+      }
+    }
+    if (keys.ArrowDown) {
+      slide(); 
+    }
+    if (keys.ArrowRight) {
+      if (cactus.x < cactus.maxX) {
+        cactus.x += cactus.velX;
+      }
+    }
+    if (keys.ArrowLeft) {
+      if (cactus.x > 0) {
+        cactus.x -= cactus.velX;
+      }
+    }
+    // detect floor
+    if (cactus.y + cactus.height >= game.height) {
+      cactus.jumping = false;
+    } 
+    // apply gravity if jumping
+    if (cactus.jumping) cactus.y += cactus.gravityRate;
+  }
+
 function gameLoop() {
+  // console.log(cactus.sliding)
   ctx.clearRect(0, 0, game.width, game.height);
-  cactus.update();
   cactus.draw();
+  update();
   window.requestAnimationFrame(gameLoop);
 };
 
@@ -122,5 +139,5 @@ document.addEventListener('DOMContentLoaded', function() {
   cactus = new Character(50, game.height - 100, 'green', 50, 100);
   document.addEventListener('keydown', keydownHandler);
   document.addEventListener('keyup', keyupHandler);
-  gameLoop();
+  gameLoop(); 
 });
