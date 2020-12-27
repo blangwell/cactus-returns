@@ -23,7 +23,7 @@ function Character(x, y, color, width, height) {
   this.width = width;
   this.height = height;
   this.velX = 5;
-  this.velY = 1;
+  this.velY = 10;
   this.maxX = game.width / 3;
   this.maxJump = this.y - 150;
   this.gravityRate = 4;
@@ -48,16 +48,17 @@ function jump() {
   // adding the check for !cactus.jumping prevents stutter jump
   if (!cactus.sliding && !cactus.jumping) {
     cactus.jumping = true;
-    while (cactus.y >= cactus.maxJump) {
-      cactus.y -= 1;
-    }
-
-    // let jumpAnimation = setInterval(() => {
-    //   cactus.y -= 5;
-    // }, 12)
-    // if (cactus.y <= cactus.maxJump + 1) {
-    //   clearInterval(jumpAnimation)
+    // while (cactus.y >= cactus.maxJump) {
+    //   cactus.y -= 1;
     // }
+
+    let jumpAnimation = setInterval(() => {
+      if (cactus.y > cactus.maxJump) {
+        cactus.y -= cactus.velY;
+      } else {
+        clearInterval(jumpAnimation)
+      }
+    }, 12)
   }
 };
 
@@ -78,7 +79,7 @@ function slide() {
       cactus.y -= cactus.height;
       [cactus.height, cactus.width] = [cactus.width, cactus.height];
       clearInterval(slideForward)
-    }, 500);
+    }, 600);
   } 
 };
 
@@ -122,8 +123,11 @@ function update() {
   // slide back towards center of movement area
   if (!keys.ArrowRight && !cactus.sliding) {
     setTimeout(() => {
-      if (cactus.x > 50) cactus.x -= 2;
-    }, 200)
+      let slideBack = setInterval(() => {
+        if (cactus.x > 50 && !cactus.sliding && !cactus.jumping) cactus.x -= 1;
+        else clearInterval(slideBack)
+      }, 100)
+    }, 1000)
   }
   
 };
