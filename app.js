@@ -4,20 +4,14 @@ const ctx = game.getContext('2d');
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
 
-let cactus;
-let gameOver = true;
-let paused = false;
-
 let bgImage = new Image();
 bgImage.src = './assets/darkfantasyBg.jpg'
 let bgX = 0;
 
-let keys = {
-  ArrowUp: false,
-  ArrowRight: false,
-  ArrowDown: false,
-  ArrowLeft: false
-};
+let cactus;
+let gameOver = true;
+let keys = {};
+let paused = false;
 
 // TODO audit Character properties
 function Character(x, y, color, width, height) {
@@ -35,17 +29,13 @@ function Character(x, y, color, width, height) {
   this.jumping = false;
   this.sliding = false;
   this.stationary = true;
-  this.render = function () {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height)
-  }
 };
 
 function menu() {
-  ctx.fillStyle = 'grey';
+  ctx.fillStyle = 'white';
   ctx.font = "30px Arial";
   ctx.textAlign = 'center'
-  // ctx.fillText("Press Any Key to Start", game.width / 2, game.height / 2)
+  ctx.fillText("Press Any Key to Start", game.width / 2, game.height / 2)
 };
 
 function pause() {
@@ -77,6 +67,14 @@ function jump() {
   }
 };
 
+function rubberband() {
+  if (cactus.x > cactus.startingX && cactus.stationary) {
+    cactus.x -= 2;
+  } else if (cactus.x < cactus.startingX && cactus.stationary) {
+    cactus.x += 2;
+  }
+};
+
 function slide() {
   if (!cactus.sliding && !cactus.jumping) {
     cactus.sliding = true;
@@ -100,14 +98,6 @@ function slide() {
   }
 };
 
-function rubberband() {
-  if (cactus.x > cactus.startingX && cactus.stationary) {
-    cactus.x -= 1;
-  } else if (cactus.x < cactus.startingX && cactus.stationary) {
-    cactus.x += 1;
-  }
-};
-
 function drawBackground() {
   ctx.drawImage(bgImage, bgX, 0, game.width, game.height);
   ctx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
@@ -115,7 +105,7 @@ function drawBackground() {
   if (bgX < -game.width) bgX = 0;
 }
 
-function update() {
+function movementHandler() {
   if (!cactus.jumping
     && !cactus.sliding
     && !keys.ArrowLeft
@@ -125,7 +115,6 @@ function update() {
     cactus.stationary = false;
   }
 
-  // movement logic based on keys object
   if (keys.ArrowUp) {
     if (!cactus.jumping && !cactus.sliding) {
       jump();
@@ -150,10 +139,7 @@ function update() {
   if (cactus.y + cactus.height >= game.height) cactus.jumping = false;
   // apply gravity if jumping
   if (cactus.jumping) cactus.y += cactus.gravityRate;
-
-  // rubberbanding back to start position
-  rubberband();
-};
+}
 
 function keydownHandler(e) {
   // e.preventDefault();
@@ -171,14 +157,25 @@ function keyupHandler(e) {
   keys[e.code] = false;
 };
 
+function update() {
+  movementHandler();
+  rubberband();
+};
+
+function render() {
+  ctx.drawImage(bgImage, bgX, 0, game.width, game.height);
+  ctx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
+  // cactus.render();
+  ctx.fillStyle = cactus.color;
+  ctx.fillRect(cactus.x, cactus.y, cactus.width, cactus.height)
+}
+
 function gameLoop() {
   ctx.clearRect(0, 0, game.width, game.height);
   drawBackground();
-  cactus.render();
-
-  if (paused) pause()
-  else if (!paused) update();
-
+  render();
+  if (!paused) update();
+  else pause();
   window.requestAnimationFrame(gameLoop);
 };
 
