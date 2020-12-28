@@ -3,6 +3,7 @@ const ctx = game.getContext('2d');
 
 let cactus;
 let gameOver = true;
+let paused = false;
 
 let keys = {
   ArrowUp: false,
@@ -13,7 +14,26 @@ let keys = {
 
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
-game.style.backgroundColor = 'darkred';
+game.style.backgroundColor = 'lightgray';
+
+const STATES = {
+  Menu: 0,
+  Pause: 1,
+  Play: 2
+}
+
+function State(x, y, width, height, state, color) {
+  this.x = x;
+  this.y = y;
+  this.width = width;
+  this.height = height;
+  this.state = state;
+  this.color = color;
+  this.render = function() {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height)
+  }
+}
 
 // TODO audit Character properties
 function Character(x, y, color, width, height) {
@@ -30,20 +50,29 @@ function Character(x, y, color, width, height) {
   this.gravityRate = 4;
   this.jumping = false;
   this.sliding = false;
-  this.draw = function() {
+  this.stationary = true;
+  this.render = function () {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.width, this.height)
   }
 };
 
 function menu() {
+  ctx.fillStyle = 'grey';
   ctx.font = "30px Arial";
   ctx.textAlign = 'center'
   // ctx.fillText("Press Any Key to Start", game.width / 2, game.height / 2)
 };
 
+function pause() {
+  ctx.fillStyle = 'darkred';
+  ctx.font = '75px Barbarian';
+  ctx.textAlign = 'center';
+  ctx.fillText("Paused)", game.width / 2, game.height / 2);
+}
+
 function detectCollision(obj) {
-  
+
 };
 
 function jump() {
@@ -64,10 +93,10 @@ function slide() {
     [cactus.width, cactus.height] = [cactus.height, cactus.width];
     let slideDistance = cactus.x + cactus.width;
     let slideForward = setInterval(() => {
-      if (cactus.x <= slideDistance 
+      if (cactus.x <= slideDistance
         && cactus.x <= cactus.maxX) {
-          cactus.x += 5;
-        } 
+        cactus.x += 5;
+      }
     }, 12);
 
     setTimeout(() => {
@@ -76,38 +105,37 @@ function slide() {
       cactus.y -= cactus.height;
       [cactus.height, cactus.width] = [cactus.width, cactus.height];
     }, 500);
-  } 
+  }
 };
 
 function rubberband() {
-  if (
-    cactus.x >= cactus.startingX + 2
-    && !cactus.jumping 
-    && !keys.ArrowRight 
-    && !cactus.sliding
-    ) {
-      cactus.x -= 1;
+  if (cactus.x > cactus.startingX && cactus.stationary) {
+    cactus.x -= 1;
   }
-  else if (
-    cactus.x < cactus.startingX
-    && !cactus.jumping 
-    && !keys.ArrowRight 
-    && !cactus.sliding
-    ) {
-      cactus.x += 1;
+  else if (cactus.x < cactus.startingX && cactus.stationary) {
+    cactus.x += 1;
   }
-}
+};
 
 function update() {
+  if (!cactus.jumping
+    && !cactus.sliding
+    && !keys.ArrowLeft
+    && !keys.ArrowRight) {
+    cactus.stationary = true;
+  } else {
+    cactus.stationary = false;
+  }
+
   // movement logic based on keys object
   if (keys.ArrowUp) {
     if (!cactus.jumping && !cactus.sliding) {
       jump();
-    } 
+    }
   }
   if (keys.ArrowDown) {
-    slide(); 
-  } 
+    slide();
+  }
   if (keys.ArrowRight) {
     // TODO if moving right, speed up the scroll of background/enemies
     if (cactus.x < cactus.maxX) {
@@ -124,14 +152,21 @@ function update() {
   if (cactus.y + cactus.height >= game.height) cactus.jumping = false;
   // apply gravity if jumping
   if (cactus.jumping) cactus.y += cactus.gravityRate;
-  
+
   // rubberbanding back to start position
   rubberband();
 };
 
 function keydownHandler(e) {
-  e.preventDefault();
+  // e.preventDefault();
   keys[e.code] = true;
+  if (keys.KeyP) {
+    if (paused) {
+      paused = false;
+      pause();
+    }
+    else paused = true;
+  }
 };
 
 function keyupHandler(e) {
@@ -140,15 +175,16 @@ function keyupHandler(e) {
 
 function gameLoop() {
   ctx.clearRect(0, 0, game.width, game.height);
-  menu();
-  update();
-  cactus.draw();
+  // menu();
+  cactus.render();
+  if (!paused) update();
+  else pause();
   window.requestAnimationFrame(gameLoop);
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   cactus = new Character(50, game.height - 100, 'green', 50, 100);
   document.addEventListener('keydown', keydownHandler);
   document.addEventListener('keyup', keyupHandler);
-  gameLoop(); 
+  gameLoop();
 });
