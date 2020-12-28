@@ -37,7 +37,9 @@ function Character(x, y, color, width, height) {
 };
 
 function menu() {
-
+  ctx.font = "30px Arial";
+  ctx.textAlign = 'center'
+  // ctx.fillText("Press Any Key to Start", game.width / 2, game.height / 2)
 };
 
 function detectCollision(obj) {
@@ -77,6 +79,25 @@ function slide() {
   } 
 };
 
+function rubberband() {
+  if (
+    cactus.x >= cactus.startingX + 2
+    && !cactus.jumping 
+    && !keys.ArrowRight 
+    && !cactus.sliding
+    ) {
+      cactus.x -= 1;
+  }
+  else if (
+    cactus.x < cactus.startingX
+    && !cactus.jumping 
+    && !keys.ArrowRight 
+    && !cactus.sliding
+    ) {
+      cactus.x += 1;
+  }
+}
+
 function update() {
   // movement logic based on keys object
   if (keys.ArrowUp) {
@@ -105,12 +126,11 @@ function update() {
   if (cactus.jumping) cactus.y += cactus.gravityRate;
   
   // rubberbanding back to start position
-  if (cactus.x > cactus.startingX && !cactus.jumping) {
-    cactus.x -= 1;
-  }
+  rubberband();
 };
 
 function keydownHandler(e) {
+  e.preventDefault();
   keys[e.code] = true;
 };
 
@@ -120,6 +140,7 @@ function keyupHandler(e) {
 
 function gameLoop() {
   ctx.clearRect(0, 0, game.width, game.height);
+  menu();
   update();
   cactus.draw();
   window.requestAnimationFrame(gameLoop);
