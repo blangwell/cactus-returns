@@ -87,6 +87,7 @@ function slide() {
       if (cactus.x <= slideDistance
         && cactus.x <= cactus.maxX) {
         cactus.x += 5;
+        bgX -= 2; // speed up background scroll
       }
     }, 12);
 
@@ -102,8 +103,7 @@ function slide() {
 function rubberband() {
   if (cactus.x > cactus.startingX && cactus.stationary) {
     cactus.x -= 1;
-  }
-  else if (cactus.x < cactus.startingX && cactus.stationary) {
+  } else if (cactus.x < cactus.startingX && cactus.stationary) {
     cactus.x += 1;
   }
 };
@@ -111,7 +111,7 @@ function rubberband() {
 function drawBackground() {
   ctx.drawImage(bgImage, bgX, 0, game.width, game.height);
   ctx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
-  if (!paused) bgX -= 3;
+  if (!paused) bgX -= 4;
   if (bgX < -game.width) bgX = 0;
 }
 
@@ -135,15 +135,15 @@ function update() {
     slide();
   }
   if (keys.ArrowRight) {
-    // TODO if moving right, speed up the scroll of background/enemies
     if (cactus.x < cactus.maxX) {
       cactus.x += cactus.velX;
+      bgX -= 2; // speed up bg scroll
     }
   }
   if (keys.ArrowLeft) {
-    // TODO if moving left, slightly slow the scroll
     if (cactus.x > 0) {
       cactus.x -= cactus.velX;
+      bgX += 1; // slow the bg scroll
     }
   }
   // detect floor
