@@ -25,7 +25,7 @@ function Character(x, y, color, width, height) {
   this.maxX = game.width / 2;
   this.startingX = x;
   this.maxJump = this.y - 150;
-  this.gravityRate = 4;
+  this.gravRate = 8;
   this.jumping = false;
   this.sliding = false;
   this.stationary = true;
@@ -98,13 +98,6 @@ function slide() {
   }
 };
 
-function drawBackground() {
-  ctx.drawImage(bgImage, bgX, 0, game.width, game.height);
-  ctx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
-  if (!paused) bgX -= 4;
-  if (bgX < -game.width) bgX = 0;
-}
-
 function movementHandler() {
   if (!cactus.jumping
     && !cactus.sliding
@@ -138,7 +131,7 @@ function movementHandler() {
   // detect floor
   if (cactus.y + cactus.height >= game.height) cactus.jumping = false;
   // apply gravity if jumping
-  if (cactus.jumping) cactus.y += cactus.gravityRate;
+  if (cactus.jumping) cactus.y += cactus.gravRate;
 }
 
 function keydownHandler(e) {
@@ -160,19 +153,21 @@ function keyupHandler(e) {
 function update() {
   movementHandler();
   rubberband();
+  if (!paused) bgX -= 4;
+  if (bgX < -game.width) bgX = 0;
 };
 
 function render() {
+  // background
   ctx.drawImage(bgImage, bgX, 0, game.width, game.height);
   ctx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
-  // cactus.render();
+  // cactus
   ctx.fillStyle = cactus.color;
   ctx.fillRect(cactus.x, cactus.y, cactus.width, cactus.height)
 }
 
 function gameLoop() {
   ctx.clearRect(0, 0, game.width, game.height);
-  drawBackground();
   render();
   if (!paused) update();
   else pause();
