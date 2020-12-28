@@ -7,14 +7,29 @@
   src: url('./assets/GaramondBold.ttf')
 }
 
-
 body {
   background-color: black;
   color: darkred;
-  text-align: center;
+  margin: 10px 50px;
 }
 h1 {
   font-family: 'Souls';
   font-size: 40px;
   padding: 0;
+  text-align: center;
+}
+canvas {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+#bg-layer {
+  z-index: 1;
+}
+#game-layer {
+  z-index: 2;
 }

@@ -1,11 +1,15 @@
-const game = document.getElementById('game');
+const game = document.getElementById('game-layer');
+const bgLayer = document.getElementById('bg-layer');
 const ctx = game.getContext('2d');
+const bgCtx = bgLayer.getContext('2d');
 
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
+bgLayer.setAttribute('height', 400);
+bgLayer.setAttribute('width', 500);
 
 let bgImage = new Image();
-bgImage.src = './assets/darkfantasyBg.jpg'
+bgImage.src = './assets/darkfantasyBg.jpg';
 let bgX = 0;
 
 let cactus;
@@ -159,8 +163,8 @@ function update() {
 
 function render() {
   // background
-  ctx.drawImage(bgImage, bgX, 0, game.width, game.height);
-  ctx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
+  bgCtx.drawImage(bgImage, bgX, 0, game.width, game.height);
+  bgCtx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
   // cactus
   ctx.fillStyle = cactus.color;
   ctx.fillRect(cactus.x, cactus.y, cactus.width, cactus.height)
