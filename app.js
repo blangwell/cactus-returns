@@ -25,6 +25,7 @@ function Character(x, y, color, width, height) {
   this.velX = 5;
   this.velY = 10;
   this.maxX = game.width / 2;
+  this.startingX = x;
   this.maxJump = this.y - 150;
   this.gravityRate = 4;
   this.jumping = false;
@@ -33,13 +34,6 @@ function Character(x, y, color, width, height) {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.width, this.height)
   }
-};
-
-function rubberband() {
-  let slideBack = setInterval(() => {
-    if (!cactus.jumping && !keys.ArrowRight && !cactus.sliding) cactus.x -= 1;
-    if (cactus.x <= 75) clearInterval(slideBack)
-  }, 500)
 };
 
 function menu() {
@@ -109,6 +103,11 @@ function update() {
   if (cactus.y + cactus.height >= game.height) cactus.jumping = false;
   // apply gravity if jumping
   if (cactus.jumping) cactus.y += cactus.gravityRate;
+  
+  // rubberbanding back to start position
+  if (cactus.x > cactus.startingX && !cactus.jumping) {
+    cactus.x -= 1;
+  }
 };
 
 function keydownHandler(e) {
