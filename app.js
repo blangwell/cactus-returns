@@ -1,9 +1,16 @@
 const game = document.getElementById('game');
 const ctx = game.getContext('2d');
 
+game.setAttribute('height', 400);
+game.setAttribute('width', 500);
+
 let cactus;
 let gameOver = true;
 let paused = false;
+
+let bgImage = new Image();
+bgImage.src = './assets/darkfantasyBg.jpg'
+let bgX = 0;
 
 let keys = {
   ArrowUp: false,
@@ -11,29 +18,6 @@ let keys = {
   ArrowDown: false,
   ArrowLeft: false
 };
-
-game.setAttribute('height', 400);
-game.setAttribute('width', 500);
-game.style.backgroundColor = 'lightgray';
-
-const STATES = {
-  Menu: 0,
-  Pause: 1,
-  Play: 2
-}
-
-function State(x, y, width, height, state, color) {
-  this.x = x;
-  this.y = y;
-  this.width = width;
-  this.height = height;
-  this.state = state;
-  this.color = color;
-  this.render = function() {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height)
-  }
-}
 
 // TODO audit Character properties
 function Character(x, y, color, width, height) {
@@ -65,10 +49,17 @@ function menu() {
 };
 
 function pause() {
-  ctx.fillStyle = 'darkred';
+  ctx.fillStyle = 'black';
+  ctx.strokeStyle = 'darkred'
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(0, 0, game.width, game.height);
+  ctx.strokeRect(0, 0, game.width, game.height);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = 'rgb(255, 187, 0)';
   ctx.font = '75px Barbarian';
   ctx.textAlign = 'center';
-  ctx.fillText("Paused)", game.width / 2, game.height / 2);
+  ctx.fillText("Paused)", game.width / 2, game.height / 2 + 20);
+  ctx.strokeText("Paused)", game.width / 2, game.height / 2 + 20);
 }
 
 function detectCollision(obj) {
@@ -116,6 +107,13 @@ function rubberband() {
     cactus.x += 1;
   }
 };
+
+function drawBackground() {
+  ctx.drawImage(bgImage, bgX, 0, game.width, game.height);
+  ctx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
+  if (!paused) bgX -= 3;
+  if (bgX < -game.width) bgX = 0;
+}
 
 function update() {
   if (!cactus.jumping
@@ -175,10 +173,12 @@ function keyupHandler(e) {
 
 function gameLoop() {
   ctx.clearRect(0, 0, game.width, game.height);
-  // menu();
+  drawBackground();
   cactus.render();
-  if (!paused) update();
-  else pause();
+
+  if (paused) pause()
+  else if (!paused) update();
+
   window.requestAnimationFrame(gameLoop);
 };
 

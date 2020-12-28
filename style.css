@@ -2,8 +2,19 @@
   font-family: 'Barbarian';
   src: url('./assets/Barbarian.ttf')
 }
+@font-face {
+  font-family: 'Souls';
+  src: url('./assets/GaramondBold.ttf')
+}
+
 
 body {
   background-color: black;
   color: darkred;
+  text-align: center;
+}
+h1 {
+  font-family: 'Souls';
+  font-size: 40px;
+  padding: 0;
 }
