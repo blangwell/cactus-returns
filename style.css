@@ -6,7 +6,6 @@
   font-family: 'Souls';
   src: url('./assets/GaramondBold.ttf')
 }
-
 body {
   background-color: black;
   color: darkred;
@@ -26,7 +25,6 @@ canvas {
   right: 0;
   text-align: center;
 }
-
 #bg-layer {
   z-index: 1;
 }

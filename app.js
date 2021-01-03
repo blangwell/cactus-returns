@@ -13,6 +13,7 @@ bgImage.src = './assets/darkfantasyBg.jpg';
 let bgX = 0;
 
 let cactus;
+let enemies = [];
 let gameOver = true;
 let keys = {};
 let paused = false;
@@ -33,6 +34,10 @@ function Character(x, y, color, width, height) {
   this.jumping = false;
   this.sliding = false;
   this.stationary = true;
+  this.render = function() {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+  }
 };
 
 function menu() {
@@ -61,7 +66,6 @@ function detectCollision(obj) {
 };
 
 function jump() {
-  // adding the check for !cactus.jumping prevents stutter jump
   if (!cactus.sliding && !cactus.jumping) {
     cactus.jumping = true;
     let jumpAnimation = setInterval(() => {
@@ -71,36 +75,22 @@ function jump() {
   }
 };
 
-function rubberband() {
-  if (cactus.x > cactus.startingX && cactus.stationary) {
-    cactus.x -= 2;
-  } else if (cactus.x < cactus.startingX && cactus.stationary) {
-    cactus.x += 2;
+function keydownHandler(e) {
+  // e.preventDefault();
+  keys[e.code] = true;
+  if (keys.KeyP) {
+    if (paused) {
+      paused = false;
+      pause();
+    }
+    else paused = true;
   }
 };
 
-function slide() {
-  if (!cactus.sliding && !cactus.jumping) {
-    cactus.sliding = true;
-    cactus.y += Math.min(cactus.height / 2);
-    [cactus.width, cactus.height] = [cactus.height, cactus.width];
-    let slideDistance = cactus.x + cactus.width;
-    let slideForward = setInterval(() => {
-      if (cactus.x <= slideDistance
-        && cactus.x <= cactus.maxX) {
-        cactus.x += 5;
-        bgX -= 2; // speed up background scroll
-      }
-    }, 12);
-
-    setTimeout(() => {
-      clearInterval(slideForward)
-      cactus.sliding = false;
-      cactus.y -= cactus.height;
-      [cactus.height, cactus.width] = [cactus.width, cactus.height];
-    }, 500);
-  }
+function keyupHandler(e) {
+  keys[e.code] = false;
 };
+
 
 function movementHandler() {
   if (!cactus.jumping
@@ -121,9 +111,9 @@ function movementHandler() {
     slide();
   }
   if (keys.ArrowRight) {
-    if (cactus.x < cactus.maxX) {
+    bgX -= 2; // speed up bg scroll
+    if (cactus.x <= cactus.maxX) {
       cactus.x += cactus.velX;
-      bgX -= 2; // speed up bg scroll
     }
   }
   if (keys.ArrowLeft) {
@@ -136,28 +126,60 @@ function movementHandler() {
   if (cactus.y + cactus.height >= game.height) cactus.jumping = false;
   // apply gravity if jumping
   if (cactus.jumping) cactus.y += cactus.gravRate;
-}
+};
 
-function keydownHandler(e) {
-  // e.preventDefault();
-  keys[e.code] = true;
-  if (keys.KeyP) {
-    if (paused) {
-      paused = false;
-      pause();
-    }
-    else paused = true;
+function rubberband() {
+  if (cactus.x > cactus.startingX && cactus.stationary) {
+    cactus.x -= 2;
+  } else if (cactus.x < cactus.startingX && cactus.stationary) {
+    cactus.x += 2;
   }
 };
 
-function keyupHandler(e) {
-  keys[e.code] = false;
+function slide() {
+  if (!cactus.sliding && !cactus.jumping) {
+    cactus.sliding = true;
+    cactus.y += Math.min(cactus.height / 2);
+    [cactus.width, cactus.height] = [cactus.height, cactus.width];
+    let slideDistance = cactus.x + cactus.width;
+    
+    let slideForward = setInterval(() => {
+      if (cactus.x <= slideDistance
+        && cactus.x <= cactus.maxX) {
+        cactus.x += 5;
+        bgX -= 2; // speed up background scroll
+      }
+    }, 12);
+    
+    setTimeout(() => {
+      clearInterval(slideForward)
+      cactus.sliding = false;
+      cactus.y -= cactus.height;
+      [cactus.height, cactus.width] = [cactus.width, cactus.height];
+    }, 500);
+  }
 };
+
+// scroll should be its own function determined by global var
+
+function spawnEnemies() {
+  enemies.forEach(enemy => {
+    enemy.render()
+    enemy.x -= enemy.velX;
+    if (enemy.x < 0 - enemy.width) {
+      enemies.shift();
+      enemies.push(new Character(game.width + enemy.width, game.height - 50, 'red', 50, 50));
+    }
+  })
+}
 
 function update() {
   movementHandler();
   rubberband();
-  if (!paused) bgX -= 4;
+  if (!paused) {
+    bgX -= 4; // scroll background
+    if (enemies) spawnEnemies();
+  }
   if (bgX < -game.width) bgX = 0;
 };
 
@@ -165,9 +187,7 @@ function render() {
   // background
   bgCtx.drawImage(bgImage, bgX, 0, game.width, game.height);
   bgCtx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
-  // cactus
-  ctx.fillStyle = cactus.color;
-  ctx.fillRect(cactus.x, cactus.y, cactus.width, cactus.height)
+  cactus.render();
 }
 
 function gameLoop() {
@@ -180,6 +200,7 @@ function gameLoop() {
 
 document.addEventListener('DOMContentLoaded', function () {
   cactus = new Character(50, game.height - 100, 'green', 50, 100);
+  enemies.push(new Character(game.width + 50, game.height - 50, 'red', 50, 50));
   document.addEventListener('keydown', keydownHandler);
   document.addEventListener('keyup', keyupHandler);
   gameLoop();
