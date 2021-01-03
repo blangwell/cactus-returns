@@ -62,6 +62,13 @@ function pause() {
 }
 
 function detectCollision(obj) {
+  if (
+    cactus.x + cactus.width - 10 > obj.x  &&
+    cactus.x + 10 < obj.x + obj.width &&
+    cactus.y + cactus.height > obj.y
+    ) {
+      console.log('COLLISION')
+    }
 
 };
 
@@ -117,15 +124,14 @@ function movementHandler() {
     }
   }
   if (keys.ArrowLeft) {
+    bgX += 1; // slow the bg scroll
     if (cactus.x > 0) {
       cactus.x -= cactus.velX;
-      bgX += 1; // slow the bg scroll
     }
   }
-  // detect floor
-  if (cactus.y + cactus.height >= game.height) cactus.jumping = false;
-  // apply gravity if jumping
-  if (cactus.jumping) cactus.y += cactus.gravRate;
+  // detect floor and apply gravity if jumping
+  if (cactus.y + cactus.height > game.height) cactus.jumping = false;
+  else cactus.y += cactus.gravRate;
 };
 
 function rubberband() {
@@ -164,10 +170,12 @@ function slide() {
 
 function spawnEnemies() {
   enemies.forEach(enemy => {
-    enemy.render()
+    enemy.render();
+    detectCollision(enemy);
     enemy.x -= enemy.velX;
     if (enemy.x < 0 - enemy.width) {
       enemies.shift();
+      console.log('ENEMY REMOVED')
       enemies.push(new Character(game.width + enemy.width, game.height - 50, 'red', 50, 50));
     }
   })
