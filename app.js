@@ -10,6 +10,8 @@ bgLayer.setAttribute('width', 500);
 
 // SPRITE STUFF
 
+let sampleSprite = document.getElementById('sample-sprite');
+
 let enemies = [new Character(game.width + 50, game.height - 50, 'red', 50, 50)];
 
 let bgImage = new Image();
@@ -18,6 +20,7 @@ let bgX = 0;
 
 
 let cactus;
+let dude;
 let gameOver = true;
 let keys = {};
 let paused = false;
@@ -118,19 +121,23 @@ function movementHandler() {
 
   if (keys.ArrowUp) {
     if (!cactus.jumping && !cactus.sliding) {
+      dude.dy -= 10;
       jump();
     }
   }
   if (keys.ArrowDown) {
+    dude.dy += 10;
     slide();
   }
   if (keys.ArrowRight) {
     bgX -= 2; // speed up bg scroll
     if (cactus.x <= cactus.maxX) {
+      dude.dx += 10;
       cactus.x += cactus.velX;
     }
   }
   if (keys.ArrowLeft) {
+    dude.dx -= 10;
     bgX += 1; // slow the bg scroll
     if (cactus.x > 0) {
       cactus.x -= cactus.velX;
@@ -200,41 +207,52 @@ function update() {
   if (bgX < -game.width) bgX = 0;
 };
 
-let sampleSprite = document.getElementById("sample-sprite");
-const spriteColumns = 8;
-let fps = 60
-let frameWidth = sampleSprite.width / spriteColumns;
-console.log(sampleSprite.src)
-let frameHeight = sampleSprite.height;
-let currentFrame = 0;
-let ticker = 0;
+function Sprite(spriteSheet, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+  this.spriteSheet = spriteSheet;
+  this.sx = sx;
+  this.sy = sy;
+  this.sWidth = sWidth;
+  this.sHeight = sHeight;
+  this.dx = dx;
+  this.dy = dy;
+  this.dWidth = dWidth;
+  this.dHeight = dHeight;
+  
+  this.currentFrame = 0;
+  this.frameHeight = this.sHeight;
+  this.sColumns = 7;
+  this.frameWidth = Math.floor(this.sWidth / this.sColumns);
+  this.ticker = 0;
+  this.maxFrame = this.sColumns - 1;
+  this.column = this.currentFrame % this.sColumns;
+  this.row = 1;
+
+
+  this.render = function() {
+    this.ticker++ 
+    if (this.ticker % 5 === 0) {
+      this.currentFrame = this.ticker / 5
+    }
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy, 
+      this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight)
+
+    if (this.ticker > this.sColumns * 5) this.ticker = 0;
+
+    if (this.currentFrame > this.maxFrame ) {
+      this.currentFrame = 0;
+    }
+  }
+  
+}
 
 function render() {
-  let column = currentFrame % spriteColumns;
-  let row = Math.floor(currentFrame/ spriteColumns);
-  ctx.imageSmoothingEnabled = false;
-  ticker++
-
-  if (ticker % 20 === 0) {
-    currentFrame = ticker / 20
-  }
-  if (ticker > spriteColumns * 20) ticker = 0;
-  
-  ctx.drawImage(sampleSprite, column * frameWidth, row * frameHeight, frameWidth, frameHeight, 100, 100, 32, 32)
-
-  let maxFrame = spriteColumns - 1;
-  if (currentFrame > maxFrame ) {
-    currentFrame = 0;
-  }
-  
-
-
   // background
   bgCtx.drawImage(bgImage, bgX, 0, game.width, game.height);
   bgCtx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
   cactus.render();
 
-  ctx.drawImage(sampleSprite, 0, 3, 16, 18, 50, 50, 64, 72)
+  dude.render();
 }
 
 function gameLoop() {
@@ -245,9 +263,10 @@ function gameLoop() {
   window.requestAnimationFrame(gameLoop);
 };
 
+
 document.addEventListener('DOMContentLoaded', function () {
   cactus = new Character(50, game.height - 100, 'green', 50, 100);
-  // enemies.push(new Character(game.width + 50, game.height - 50, 'red', 50, 50));
+  dude = new Sprite(sampleSprite, 0, 3, 16, 18, 32, 32, 64, 72)
   document.addEventListener('keydown', keydownHandler);
   document.addEventListener('keyup', keyupHandler);
   gameLoop();
