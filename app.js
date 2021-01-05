@@ -8,15 +8,21 @@ game.setAttribute('width', 500);
 bgLayer.setAttribute('height', 400);
 bgLayer.setAttribute('width', 500);
 
+// SPRITE STUFF
+
+let enemies = [new Character(game.width + 50, game.height - 50, 'red', 50, 50)];
+
 let bgImage = new Image();
 bgImage.src = './assets/darkfantasyBg.jpg';
 let bgX = 0;
 
+
 let cactus;
-let enemies = [];
 let gameOver = true;
 let keys = {};
 let paused = false;
+
+let canJump = true;
 
 // TODO audit Character properties
 function Character(x, y, color, width, height) {
@@ -65,7 +71,8 @@ function detectCollision(obj) {
   if (
     cactus.x + cactus.width - 10 > obj.x  &&
     cactus.x + 10 < obj.x + obj.width &&
-    cactus.y + cactus.height > obj.y
+    cactus.y + cactus.height > obj.y &&
+    cactus.y < obj.y + obj.height
     ) {
       console.log('COLLISION')
     }
@@ -176,7 +183,7 @@ function spawnEnemies() {
     if (enemy.x < 0 - enemy.width) {
       enemies.shift();
       console.log('ENEMY REMOVED')
-      enemies.push(new Character(game.width + enemy.width, game.height - 50, 'red', 50, 50));
+      enemies.push(new Character(game.width + enemy.width, game.height - cactus.height, 'red', 50, 50));
     }
   })
 }
@@ -186,16 +193,48 @@ function update() {
   rubberband();
   if (!paused) {
     bgX -= 4; // scroll background
-    if (enemies) spawnEnemies();
+    if (enemies) {
+      spawnEnemies();
+    } 
   }
   if (bgX < -game.width) bgX = 0;
 };
 
+let sampleSprite = document.getElementById("sample-sprite");
+const spriteColumns = 8;
+let fps = 60
+let frameWidth = sampleSprite.width / spriteColumns;
+console.log(sampleSprite.src)
+let frameHeight = sampleSprite.height;
+let currentFrame = 0;
+let ticker = 0;
+
 function render() {
+  let column = currentFrame % spriteColumns;
+  let row = Math.floor(currentFrame/ spriteColumns);
+  ctx.imageSmoothingEnabled = false;
+  ticker++
+
+  if (ticker % 20 === 0) {
+    currentFrame = ticker / 20
+  }
+  if (ticker > spriteColumns * 20) ticker = 0;
+  
+  ctx.drawImage(sampleSprite, column * frameWidth, row * frameHeight, frameWidth, frameHeight, 100, 100, 32, 32)
+
+  let maxFrame = spriteColumns - 1;
+  if (currentFrame > maxFrame ) {
+    currentFrame = 0;
+  }
+  
+
+
   // background
   bgCtx.drawImage(bgImage, bgX, 0, game.width, game.height);
   bgCtx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
   cactus.render();
+
+  ctx.drawImage(sampleSprite, 0, 3, 16, 18, 50, 50, 64, 72)
 }
 
 function gameLoop() {
@@ -208,7 +247,7 @@ function gameLoop() {
 
 document.addEventListener('DOMContentLoaded', function () {
   cactus = new Character(50, game.height - 100, 'green', 50, 100);
-  enemies.push(new Character(game.width + 50, game.height - 50, 'red', 50, 50));
+  // enemies.push(new Character(game.width + 50, game.height - 50, 'red', 50, 50));
   document.addEventListener('keydown', keydownHandler);
   document.addEventListener('keyup', keyupHandler);
   gameLoop();

@@ -31,3 +31,6 @@ canvas {
 #game-layer {
   z-index: 2;
 }
+img {
+  display: none;
+}
