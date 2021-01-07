@@ -237,9 +237,9 @@ function Sprite(spriteSheet, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
     ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy, 
       this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight)
 
-    if (this.ticker > this.spriteArray.length * 5) this.ticker = 0;
+    if (this.ticker > spriteArray.length * 5) this.ticker = 0;
 
-    if (this.currentFrame > this.spriteArray.length ) {
+    if (this.currentFrame > spriteArray.length ) {
       this.currentFrame = 0;
     }
   }
@@ -252,7 +252,7 @@ function render() {
   bgCtx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
   cactus.render();
 
-  dude.render();
+  dude.render(dude.idleSprite);
 }
 
 function gameLoop() {
