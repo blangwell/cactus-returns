@@ -23,6 +23,79 @@ let paused = false;
 TODO: refactor movement/jump/rubberband functions to work with sprites
 */
 
+cactus = {
+  spriteSheet: document.getElementById('sample-sprite'),
+  sx: 0,
+  sy: 3,
+  sWidth: 16,
+  sHeight: 18,
+  dx: 50,
+  dy: game.height - 100,
+  dWidth: 64,
+  dHeight: 72,
+
+  get startingX() {
+    return this.dx;
+  },
+  stationary: true,
+  jumping: false,
+  sliding: false,
+  velX: 5,
+  velY: 10,
+  maxX: game.width / 2,
+  get column() {
+    return this.currentFrame % this.sColumns;
+  },
+  currentFrame: 0,
+  get frameHeight() {
+    return this.sHeightl
+  },
+  get frameWidth() {
+    return Math.floor(this.sWidth / this.sColumns);
+  },
+  row: 1,
+  sColumns: 7,
+  ticker: 0,
+
+  idleSprite: [2, 3],
+  jumpSprite: [4, 5, 6],
+  get fullSprite() {
+    return [...Array(this.sColumns).keys()];
+  },
+  render() {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy,
+      this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight);
+
+  },
+  update(spriteArray) {
+    this.ticker++
+    if (this.ticker % 5 === 0) {
+      this.currentFrame = this.ticker / 5
+    }
+    ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy,
+      this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight)
+
+    if (this.ticker > spriteArray.length * 5) this.ticker = 0;
+
+    if (this.currentFrame > spriteArray.length) {
+      this.currentFrame = 0;
+    }
+
+  },
+  detectDirection() {
+    // check if keys is empty or if all values are false, idle animate
+    if (
+      Object.keys(keys).length === 0 ||
+      Object.keys(keys).every(key => !keys[key])) {
+      this.update(this.fullSprite);
+    }
+    if (keys.ArrowUp) {
+      this.update(this.jumpSprite);
+    }
+  }
+};
+
 // TODO audit Character properties
 function Character(x, y, color, width, height) {
   this.x = x;
@@ -39,7 +112,7 @@ function Character(x, y, color, width, height) {
   this.jumping = false;
   this.sliding = false;
   this.stationary = true;
-  this.render = function() {
+  this.render = function () {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.width, this.height);
   }
@@ -68,29 +141,21 @@ function pause() {
 
 function detectCollision(obj) {
   if (
-    dude.dx + dude.dWidth - 10 > obj.x  &&
-    dude.dx + 10 < obj.x + obj.width &&
-    dude.dy + dude.dHeight > obj.y &&
-    dude.dy < obj.y + obj.height
-    ) 
-    {
-      console.log('COLLISION')
-    }
+    cactus.dx + cactus.dWidth - 10 > obj.x &&
+    cactus.dx + 10 < obj.x + obj.width &&
+    cactus.dy + cactus.dHeight > obj.y &&
+    cactus.dy < obj.y + obj.height
+  ) {
+    console.log('COLLISION')
+  }
 
 };
 
 function jump() {
-  // if (!cactus.sliding && !cactus.jumping) {
-  //   cactus.jumping = true;
-  //   let jumpAnimation = setInterval(() => {
-  //     if (cactus.y > cactus.maxJump) cactus.y -= cactus.velY;
-  //     else clearInterval(jumpAnimation);
-  //   }, 12)
-  // }
-  if (!dude.sliding && !dude.jumping) {
-    dude.jumping = true;
+  if (!cactus.sliding && !cactus.jumping) {
+    cactus.jumping = true;
     let jumpAnimation = setInterval(() => {
-      if (dude.dy > dude.maxJump) dude.dy -= dude.velY;
+      if (cactus.dy > 150) cactus.dy -= cactus.velY;
       else clearInterval(jumpAnimation);
     }, 12)
   }
@@ -112,19 +177,18 @@ function keyupHandler(e) {
   keys[e.code] = false;
 };
 
-
 function movementHandler() {
-  if (!dude.jumping
-    && !dude.sliding
+  if (!cactus.jumping
+    && !cactus.sliding
     && !keys.ArrowLeft
     && !keys.ArrowRight) {
-    dude.stationary = true;
+    cactus.stationary = true;
   } else {
-    dude.stationary = false;
+    cactus.stationary = false;
   }
 
   if (keys.ArrowUp) {
-    if (!dude.jumping && !dude.sliding) {
+    if (!cactus.jumping && !cactus.sliding) {
       jump();
     }
   }
@@ -133,54 +197,49 @@ function movementHandler() {
   }
   if (keys.ArrowRight) {
     bgX -= 2; // speed up bg scroll
-    if (dude.dx <= dude.maxX) {
-      dude.dx += dude.velX;
+    if (cactus.dx <= cactus.maxX) {
+      cactus.dx += cactus.velX;
     }
   }
   if (keys.ArrowLeft) {
     bgX += 1; // slow the bg scroll
-    if (dude.dx > 0) {
-      dude.dx -= dude.velX;
+    if (cactus.dx > 0) {
+      cactus.dx -= cactus.velX;
     }
   }
   // detect floor and apply gravity if jumping
-  if (dude.dy + dude.dHeight > game.height) dude.jumping = false;
-  else dude.dy += 5;
+  if (cactus.dy + cactus.dHeight > game.height) cactus.jumping = false;
+  else cactus.dy += 5;
 };
 
 function rubberband() {
-  // if (cactus.x > cactus.startingX && cactus.stationary) {
-  //   cactus.x -= 2;
-  // } else if (cactus.x < cactus.startingX && cactus.stationary) {
-  //   cactus.x += 2;
-  // }
-  if (dude.dx > dude.startingX && dude.stationary) {
-    dude.dx -= 2;
-  } else if (dude.dx < dude.startingX && dude.stationary) {
-    dude.dx += 2;
+  if (cactus.dx > cactus.startingX && cactus.stationary) {
+    cactus.dx -= 2;
+  } else if (cactus.dx < cactus.startingX && cactus.stationary) {
+    cactus.dx += 2;
   }
 };
 
 function slide() {
-  if (!dude.sliding && !dude.jumping) {
-    dude.sliding = true;
-    // dude.dy += Math.min(dude.dHeight / 2);
-    [dude.dWidth, dude.dHeight] = [dude.dHeight, dude.dWidth];
-    let slideDistance = dude.dx + dude.dWidth;
-    
+  if (!cactus.sliding && !cactus.jumping) {
+    cactus.sliding = true;
+    // cactus.dy += Math.min(cactus.dHeight / 2);
+    [cactus.dWidth, cactus.dHeight] = [cactus.dHeight, cactus.dWidth];
+    let slideDistance = cactus.dx + cactus.dWidth;
+
     let slideForward = setInterval(() => {
-      if (dude.dx <= slideDistance
-        && dude.dx <= dude.maxX) {
-        dude.dx += 5;
+      if (cactus.dx <= slideDistance
+        && cactus.dx <= cactus.maxX) {
+        cactus.dx += 5;
         bgX -= 2; // speed up background scroll
       }
     }, 12);
-    
+
     setTimeout(() => {
       clearInterval(slideForward)
-      dude.sliding = false;
-      dude.dy -= dude.dHeight;
-      [dude.dHeight, dude.dWidth] = [dude.dWidth, dude.dHeight];
+      cactus.sliding = false;
+      // cactus.dy -= cactus.dHeight;
+      [cactus.dHeight, cactus.dWidth] = [cactus.dWidth, cactus.dHeight];
     }, 500);
   }
 };
@@ -192,7 +251,7 @@ function spawnEnemies() {
     enemy.x -= enemy.velX;
     if (enemy.x < 0 - enemy.width) {
       enemies.shift();
-      enemies.push(new Character(game.width + enemy.width, game.height - dude.dHeight * 1.7, 'red', 50, 50));
+      enemies.push(new Character(game.width + enemy.width, game.height - cactus.dHeight * 1.7, 'red', 50, 50));
     }
   })
 }
@@ -204,87 +263,17 @@ function update() {
     bgX -= 4; // scroll background
     if (enemies) {
       spawnEnemies();
-    } 
+    }
   }
   if (bgX < -game.width) bgX = 0;
 };
-
-function Sprite(spriteSheet, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
-  this.spriteSheet = spriteSheet;
-  this.sx = sx;
-  this.sy = sy;
-  this.sWidth = sWidth;
-  this.sHeight = sHeight;
-  this.dx = dx;
-  this.dy = dy;
-  this.dWidth = dWidth;
-  this.dHeight = dHeight;
-
-  this.startingX = dx;
-  this.stationary = true;
-  this.jumping = false;
-  this.sliding = false;
-  this.maxJump = this.dy - 150;
-  this.velX = 5;
-  this.velY = 10;
-  this.maxX = game.width / 2;
-  
-  this.column = this.currentFrame % this.sColumns;
-  this.currentFrame = 0;
-  this.frameHeight = this.sHeight;
-  this.frameWidth = Math.floor(this.sWidth / this.sColumns);
-  this.row = 1;
-  this.sColumns = 7;
-  this.ticker = 0;
-
-  this.idleSprite = [2, 3];
-  this.fullSprite = [...Array(this.sColumns).keys()]
-  this.jumpSprite = [4, 5, 6]
-
-  this.render = function() {
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy, 
-      this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight)
-
-  }
-  this.update = function(spriteArray) {
-    this.ticker++ 
-    if (this.ticker % 5 === 0) { 
-      this.currentFrame = this.ticker / 5
-    }
-    ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy, 
-      this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight)
-
-    if (this.ticker > spriteArray.length * 5) this.ticker = 0;
-
-    if (this.currentFrame > spriteArray.length ) {
-      this.currentFrame = 0;
-    }
-
-  }
-  this.detectDirection = function() {
-    // check if keys is empty or if all values are false, idle animate
-    if (
-      Object.keys(keys).length === 0 ||
-      Object.keys(keys).every(key => !keys[key])) {
-        console.log('No keys pressed');
-        this.update(this.fullSprite);
-    } 
-    if (keys.ArrowUp) {
-      this.update(this.jumpSprite)
-    }
-  }
-
-}
 
 function render() {
   // background
   bgCtx.drawImage(bgImage, bgX, 0, game.width, game.height);
   bgCtx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
-  // cactus.render();
-
-  dude.render();
-  dude.detectDirection();
+  cactus.render();
+  cactus.detectDirection();
 }
 
 function gameLoop() {
@@ -295,10 +284,7 @@ function gameLoop() {
   window.requestAnimationFrame(gameLoop);
 };
 
-
 document.addEventListener('DOMContentLoaded', function () {
-  cactus = new Character(50, game.height - 100, 'green', 50, 100);
-  dude = new Sprite(sampleSprite, 0, 3, 16, 18, 50, game.height - 100, 64, 72);
   document.addEventListener('keydown', keydownHandler);
   document.addEventListener('keyup', keyupHandler);
   gameLoop();
