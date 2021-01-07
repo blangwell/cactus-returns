@@ -33,10 +33,7 @@ cactus = {
   dy: game.height - 100,
   dWidth: 64,
   dHeight: 72,
-
-  get startingX() {
-    return this.dx;
-  },
+  startingX: 50,
   stationary: true,
   jumping: false,
   sliding: false,
@@ -214,9 +211,9 @@ function movementHandler() {
 
 function rubberband() {
   if (cactus.dx > cactus.startingX && cactus.stationary) {
-    cactus.dx -= 2;
+    cactus.dx -= 1;
   } else if (cactus.dx < cactus.startingX && cactus.stationary) {
-    cactus.dx += 2;
+    cactus.dx += 1;
   }
 };
 
