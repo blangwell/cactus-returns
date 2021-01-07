@@ -2,30 +2,26 @@ const game = document.getElementById('game-layer');
 const bgLayer = document.getElementById('bg-layer');
 const ctx = game.getContext('2d');
 const bgCtx = bgLayer.getContext('2d');
+const sampleSprite = document.getElementById('sample-sprite');
 
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
 bgLayer.setAttribute('height', 400);
 bgLayer.setAttribute('width', 500);
 
-// SPRITE STUFF
-
-let sampleSprite = document.getElementById('sample-sprite');
-
-let enemies = [new Character(game.width + 50, game.height - 50, 'red', 50, 50)];
-
 let bgImage = new Image();
 bgImage.src = './assets/darkfantasyBg.jpg';
 let bgX = 0;
-
-
 let cactus;
 let dude;
+let enemies = [new Character(game.width + 50, game.height - 50, 'red', 50, 50)];
 let gameOver = true;
 let keys = {};
 let paused = false;
 
-let canJump = true;
+/* 
+TODO: refactor movement/jump/rubberband functions to work with sprites
+*/
 
 // TODO audit Character properties
 function Character(x, y, color, width, height) {
@@ -72,21 +68,29 @@ function pause() {
 
 function detectCollision(obj) {
   if (
-    cactus.x + cactus.width - 10 > obj.x  &&
-    cactus.x + 10 < obj.x + obj.width &&
-    cactus.y + cactus.height > obj.y &&
-    cactus.y < obj.y + obj.height
-    ) {
+    dude.dx + dude.dWidth - 10 > obj.x  &&
+    dude.dx + 10 < obj.x + obj.width &&
+    dude.dy + dude.dHeight > obj.y &&
+    dude.dy < obj.y + obj.height
+    ) 
+    {
       console.log('COLLISION')
     }
 
 };
 
 function jump() {
-  if (!cactus.sliding && !cactus.jumping) {
-    cactus.jumping = true;
+  // if (!cactus.sliding && !cactus.jumping) {
+  //   cactus.jumping = true;
+  //   let jumpAnimation = setInterval(() => {
+  //     if (cactus.y > cactus.maxJump) cactus.y -= cactus.velY;
+  //     else clearInterval(jumpAnimation);
+  //   }, 12)
+  // }
+  if (!dude.sliding && !dude.jumping) {
+    dude.jumping = true;
     let jumpAnimation = setInterval(() => {
-      if (cactus.y > cactus.maxJump) cactus.y -= cactus.velY;
+      if (dude.dy > dude.maxJump) dude.dy -= dude.velY;
       else clearInterval(jumpAnimation);
     }, 12)
   }
@@ -110,77 +114,76 @@ function keyupHandler(e) {
 
 
 function movementHandler() {
-  if (!cactus.jumping
-    && !cactus.sliding
+  if (!dude.jumping
+    && !dude.sliding
     && !keys.ArrowLeft
     && !keys.ArrowRight) {
-    cactus.stationary = true;
+    dude.stationary = true;
   } else {
-    cactus.stationary = false;
+    dude.stationary = false;
   }
 
   if (keys.ArrowUp) {
-    dude.dy -= 10;
-    if (!cactus.jumping && !cactus.sliding) {
+    if (!dude.jumping && !dude.sliding) {
       jump();
     }
   }
   if (keys.ArrowDown) {
-    dude.dy += 10;
     slide();
   }
   if (keys.ArrowRight) {
-    dude.dx += 10;
     bgX -= 2; // speed up bg scroll
-    if (cactus.x <= cactus.maxX) {
-      cactus.x += cactus.velX;
+    if (dude.dx <= dude.maxX) {
+      dude.dx += dude.velX;
     }
   }
   if (keys.ArrowLeft) {
-    dude.dx -= 10;
     bgX += 1; // slow the bg scroll
-    if (cactus.x > 0) {
-      cactus.x -= cactus.velX;
+    if (dude.dx > 0) {
+      dude.dx -= dude.velX;
     }
   }
   // detect floor and apply gravity if jumping
-  if (cactus.y + cactus.height > game.height) cactus.jumping = false;
-  else cactus.y += cactus.gravRate;
+  if (dude.dy + dude.dHeight > game.height) dude.jumping = false;
+  else dude.dy += 5;
 };
 
 function rubberband() {
-  if (cactus.x > cactus.startingX && cactus.stationary) {
-    cactus.x -= 2;
-  } else if (cactus.x < cactus.startingX && cactus.stationary) {
-    cactus.x += 2;
+  // if (cactus.x > cactus.startingX && cactus.stationary) {
+  //   cactus.x -= 2;
+  // } else if (cactus.x < cactus.startingX && cactus.stationary) {
+  //   cactus.x += 2;
+  // }
+  if (dude.dx > dude.startingX && dude.stationary) {
+    dude.dx -= 2;
+  } else if (dude.dx < dude.startingX && dude.stationary) {
+    dude.dx += 2;
   }
 };
 
 function slide() {
-  if (!cactus.sliding && !cactus.jumping) {
-    cactus.sliding = true;
-    cactus.y += Math.min(cactus.height / 2);
-    [cactus.width, cactus.height] = [cactus.height, cactus.width];
-    let slideDistance = cactus.x + cactus.width;
+  if (!dude.sliding && !dude.jumping) {
+    dude.sliding = true;
+    // dude.dy += Math.min(dude.dHeight / 2);
+    [dude.dWidth, dude.dHeight] = [dude.dHeight, dude.dWidth];
+    let slideDistance = dude.dx + dude.dWidth;
     
     let slideForward = setInterval(() => {
-      if (cactus.x <= slideDistance
-        && cactus.x <= cactus.maxX) {
-        cactus.x += 5;
+      if (dude.dx <= slideDistance
+        && dude.dx <= dude.maxX) {
+        dude.dx += 5;
         bgX -= 2; // speed up background scroll
       }
     }, 12);
     
     setTimeout(() => {
       clearInterval(slideForward)
-      cactus.sliding = false;
-      cactus.y -= cactus.height;
-      [cactus.height, cactus.width] = [cactus.width, cactus.height];
+      dude.sliding = false;
+      dude.dy -= dude.dHeight;
+      [dude.dHeight, dude.dWidth] = [dude.dWidth, dude.dHeight];
     }, 500);
   }
 };
-
-// scroll should be its own function determined by global var
 
 function spawnEnemies() {
   enemies.forEach(enemy => {
@@ -189,8 +192,7 @@ function spawnEnemies() {
     enemy.x -= enemy.velX;
     if (enemy.x < 0 - enemy.width) {
       enemies.shift();
-      console.log('ENEMY REMOVED')
-      enemies.push(new Character(game.width + enemy.width, game.height - cactus.height, 'red', 50, 50));
+      enemies.push(new Character(game.width + enemy.width, game.height - dude.dHeight * 1.7, 'red', 50, 50));
     }
   })
 }
@@ -217,23 +219,39 @@ function Sprite(spriteSheet, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
   this.dy = dy;
   this.dWidth = dWidth;
   this.dHeight = dHeight;
+
+  this.startingX = dx;
+  this.stationary = true;
+  this.jumping = false;
+  this.sliding = false;
+  this.maxJump = this.dy - 150;
+  this.velX = 5;
+  this.velY = 10;
+  this.maxX = game.width / 2;
   
+  this.column = this.currentFrame % this.sColumns;
   this.currentFrame = 0;
   this.frameHeight = this.sHeight;
-  this.sColumns = 7;
   this.frameWidth = Math.floor(this.sWidth / this.sColumns);
-  this.ticker = 0;
-  this.column = this.currentFrame % this.sColumns;
   this.row = 1;
+  this.sColumns = 7;
+  this.ticker = 0;
 
   this.idleSprite = [2, 3];
+  this.fullSprite = [...Array(this.sColumns).keys()]
+  this.jumpSprite = [4, 5, 6]
 
-  this.render = function(spriteArray) {
+  this.render = function() {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy, 
+      this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight)
+
+  }
+  this.update = function(spriteArray) {
     this.ticker++ 
     if (this.ticker % 5 === 0) { 
       this.currentFrame = this.ticker / 5
     }
-    ctx.imageSmoothingEnabled = false;
     ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy, 
       this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight)
 
@@ -242,17 +260,31 @@ function Sprite(spriteSheet, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
     if (this.currentFrame > spriteArray.length ) {
       this.currentFrame = 0;
     }
+
   }
-  
+  this.detectDirection = function() {
+    // check if keys is empty or if all values are false, idle animate
+    if (
+      Object.keys(keys).length === 0 ||
+      Object.keys(keys).every(key => !keys[key])) {
+        console.log('No keys pressed');
+        this.update(this.fullSprite);
+    } 
+    if (keys.ArrowUp) {
+      this.update(this.jumpSprite)
+    }
+  }
+
 }
 
 function render() {
   // background
   bgCtx.drawImage(bgImage, bgX, 0, game.width, game.height);
   bgCtx.drawImage(bgImage, bgX + game.width, 0, game.width, game.height);
-  cactus.render();
+  // cactus.render();
 
-  dude.render(dude.idleSprite);
+  dude.render();
+  dude.detectDirection();
 }
 
 function gameLoop() {
@@ -266,7 +298,7 @@ function gameLoop() {
 
 document.addEventListener('DOMContentLoaded', function () {
   cactus = new Character(50, game.height - 100, 'green', 50, 100);
-  dude = new Sprite(sampleSprite, 0, 3, 16, 18, 32, 32, 64, 72)
+  dude = new Sprite(sampleSprite, 0, 3, 16, 18, 50, game.height - 100, 64, 72);
   document.addEventListener('keydown', keydownHandler);
   document.addEventListener('keyup', keyupHandler);
   gameLoop();
