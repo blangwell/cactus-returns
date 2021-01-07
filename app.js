@@ -120,8 +120,8 @@ function movementHandler() {
   }
 
   if (keys.ArrowUp) {
+    dude.dy -= 10;
     if (!cactus.jumping && !cactus.sliding) {
-      dude.dy -= 10;
       jump();
     }
   }
@@ -130,9 +130,9 @@ function movementHandler() {
     slide();
   }
   if (keys.ArrowRight) {
+    dude.dx += 10;
     bgX -= 2; // speed up bg scroll
     if (cactus.x <= cactus.maxX) {
-      dude.dx += 10;
       cactus.x += cactus.velX;
     }
   }
@@ -223,23 +223,23 @@ function Sprite(spriteSheet, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
   this.sColumns = 7;
   this.frameWidth = Math.floor(this.sWidth / this.sColumns);
   this.ticker = 0;
-  this.maxFrame = this.sColumns - 1;
   this.column = this.currentFrame % this.sColumns;
   this.row = 1;
 
+  this.idleSprite = [2, 3];
 
-  this.render = function() {
+  this.render = function(spriteArray) {
     this.ticker++ 
-    if (this.ticker % 5 === 0) {
+    if (this.ticker % 5 === 0) { 
       this.currentFrame = this.ticker / 5
     }
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy, 
       this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight)
 
-    if (this.ticker > this.sColumns * 5) this.ticker = 0;
+    if (this.ticker > this.spriteArray.length * 5) this.ticker = 0;
 
-    if (this.currentFrame > this.maxFrame ) {
+    if (this.currentFrame > this.spriteArray.length ) {
       this.currentFrame = 0;
     }
   }
