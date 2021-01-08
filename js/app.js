@@ -3,6 +3,7 @@ const bgLayer = document.getElementById('bg-layer');
 const ctx = game.getContext('2d');
 const bgCtx = bgLayer.getContext('2d');
 const sampleSprite = document.getElementById('sample-sprite');
+const demonSprite = document.getElementById('demon-sprite');
 
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
@@ -13,7 +14,7 @@ let bgImage = new Image();
 bgImage.src = './assets/darkfantasyBg.jpg';
 let bgX = 0;
 let dude;
-let enemies = [new Enemy(game.width + 50, game.height - 50, 'red', 50, 50)];
+let enemies = [new EnemySprite(0, 0, 16, 17, game.width, 325, 64, 64)];
 let gameOver = true;
 let keys = {};
 let paused = false;
@@ -39,23 +40,52 @@ function Enemy(x, y, color, width, height) {
     ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 };
+function EnemySprite( sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+  this.spriteSheet = demonSprite;
+  this.sx = sx;
+  this.sy = sy;
+  this.sWidth = sWidth;
+  this.sHeight = sHeight;
+  this.dx = dx;
+  this.dy = dy;
+  this.dWidth = dWidth;
+  this.dHeight = dHeight;
+  this.ticker = 0;
+  this.currentFrame = 0;
+  this.sColumns = 5;
+  this.spriteArray = [...Array(this.sColumns).keys()];
+  this.render = function () {
+    this.update(this.spriteArray);
+    ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy,
+      this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight);
+  };
+  this.update = function(spriteArray) {
+    this.ticker++
+    if (this.ticker % 5 === 0) {
+      this.currentFrame = this.ticker / 5;
+    }
+    ctx.drawImage(this.spriteSheet, this.currentFrame * this.sWidth, this.sy,
+      this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight);
 
-function detectCollision(obj) {
-  if (
-    cactus.dx + cactus.dWidth - 10 > obj.x &&
-    cactus.dx + 10 < obj.x + obj.width &&
-    cactus.dy + cactus.dHeight > obj.y &&
-    cactus.dy < obj.y + obj.height
-  ) {
-    console.log('COLLISION');
+    if (this.ticker > spriteArray.length * 5) this.ticker = 0;
+
+    if (this.currentFrame > spriteArray.length) {
+      this.currentFrame = 0;
+    }
   }
 };
 
-function menu() {
-  ctx.fillStyle = 'white';
-  ctx.font = "30px Arial";
-  ctx.textAlign = 'center';
-  ctx.fillText("Press Any Key to Start", game.width / 2, game.height / 2);
+
+
+function detectCollision(obj) {
+  if (
+    cactus.dx + cactus.dWidth - 10 > obj.dx &&
+    cactus.dx + 10 < obj.dx + obj.dWidth &&
+    cactus.dy + cactus.dHeight > obj.dy &&
+    cactus.dy < obj.dy + obj.dHeight
+  ) {
+    console.log('COLLISION');
+  }
 };
 
 function keydownHandler(e) {
@@ -107,21 +137,7 @@ function movementHandler() {
   // detect floor and apply gravity if jumping
   if (cactus.dy + cactus.dHeight > game.height) cactus.jumping = false;
   else cactus.dy += 5;
-};
 
-function pause() {
-  cactus.update([cactus.currentFrame]);
-  ctx.fillStyle = 'black';
-  ctx.strokeStyle = 'darkred';
-  ctx.globalAlpha = 0.9;
-  ctx.fillRect(0, 0, game.width, game.height);
-  ctx.strokeRect(0, 0, game.width, game.height);
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = 'rgb(255, 187, 0)';
-  ctx.font = '75px Barbarian';
-  ctx.textAlign = 'center';
-  ctx.fillText("Paused)", game.width / 2, game.height / 2 + 20);
-  ctx.strokeText("Paused)", game.width / 2, game.height / 2 + 20);
 };
 
 function rubberband() {
@@ -137,10 +153,11 @@ function spawnEnemies() {
   enemies.forEach(enemy => {
     enemy.render();
     detectCollision(enemy);
-    enemy.x -= enemy.velX;
-    if (enemy.x < 0 - enemy.width) {
+    enemy.x -= 5;
+    enemy.dx -= 5;
+    if (enemy.dx < 0 - enemy.dWidth) {
       enemies.shift(); // remove once offscreen
-      enemies.push(new Enemy(game.width + enemy.width, game.height - cactus.dHeight * 1.7, 'red', 50, 50));
+      enemies.push(new EnemySprite(0, 0, 16, 17, game.width, 325, 64, 64));
     }
     /* randomly generate enemies
     there should be a space as wide as cactus.dx
@@ -177,6 +194,7 @@ function gameLoop() {
   if (!paused) update();
   else pause();
   window.requestAnimationFrame(gameLoop);
+  
 };
 
 document.addEventListener('DOMContentLoaded', function () {
