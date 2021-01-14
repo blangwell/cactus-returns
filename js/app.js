@@ -7,6 +7,9 @@ const menuCtx = menuLayer.getContext('2d');
 const sampleSprite = document.getElementById('sample-sprite');
 const demonSprite = document.getElementById('demon-sprite');
 
+const goCactus = new Audio('./assets/go-cactus.wav')
+const themeMusic = new Audio('./assets/three-red-hearts-quiet.wav')
+
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
 bgLayer.setAttribute('height', 400);
@@ -23,7 +26,7 @@ let gameOver = true;
 let keys = {};
 let paused = false;
 
-function EnemySprite( sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+function EnemySprite(sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
   this.spriteSheet = demonSprite;
   this.sx = sx;
   this.sy = sy;
@@ -71,6 +74,10 @@ function detectCollision(obj) {
 
 function keydownHandler(e) {
   // e.preventDefault();
+  if (gameOver && e.code === 'Enter') {
+    gameOver = false;
+    goCactus.play();
+  } 
   keys[e.code] = true;
   if (keys.KeyP) {
     if (paused) {
@@ -82,7 +89,6 @@ function keydownHandler(e) {
 };
 
 function keyupHandler(e) {
-  if (gameOver) gameOver = false;
   keys[e.code] = false;
   
 };
@@ -177,6 +183,7 @@ function gameLoop() {
   } else {
     ctx.clearRect(0, 0, game.width, game.height);
     render();
+    themeMusic.play();  
     if (!paused) update();
     else pause();
   }

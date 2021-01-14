@@ -4,9 +4,9 @@ function startMenu() {
   ctx.fillRect(0, 0, game.width, game.height);
   ctx.strokeRect(0, 0, game.width, game.height);
   ctx.fillStyle = 'rgb(255, 187, 0)';
-  ctx.font = '75px Souls';
+  ctx.font = '45px Souls';
   ctx.textAlign = 'center';
-  ctx.fillText("Press Any Key", game.width / 2, game.height / 2 + 20);
+  ctx.fillText("Press Return to Begin", game.width / 2, game.height / 2);
 }
 
 function pause() {
