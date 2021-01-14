@@ -1,7 +1,9 @@
 const game = document.getElementById('game-layer');
 const bgLayer = document.getElementById('bg-layer');
+const menuLayer = document.getElementById('menu-layer');
 const ctx = game.getContext('2d');
 const bgCtx = bgLayer.getContext('2d');
+const menuCtx = menuLayer.getContext('2d');
 const sampleSprite = document.getElementById('sample-sprite');
 const demonSprite = document.getElementById('demon-sprite');
 
@@ -9,6 +11,8 @@ game.setAttribute('height', 400);
 game.setAttribute('width', 500);
 bgLayer.setAttribute('height', 400);
 bgLayer.setAttribute('width', 500);
+menuLayer.setAttribute('height', 400);
+menuLayer.setAttribute('width', 500);
 
 let bgImage = new Image();
 bgImage.src = './assets/darkfantasyBg.jpg';
@@ -19,27 +23,6 @@ let gameOver = true;
 let keys = {};
 let paused = false;
 
-// TODO audit Character properties
-function Enemy(x, y, color, width, height) {
-  this.x = x;
-  this.y = y;
-  this.color = color;
-  this.width = width;
-  this.height = height;
-  this.velX = 5;
-  this.velY = 10;
-  this.maxX = game.width / 2;
-  this.startingX = x;
-  this.maxJump = this.y - 150;
-  this.gravRate = 8;
-  this.jumping = false;
-  this.sliding = false;
-  this.stationary = true;
-  this.render = function () {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-  }
-};
 function EnemySprite( sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
   this.spriteSheet = demonSprite;
   this.sx = sx;
@@ -75,8 +58,6 @@ function EnemySprite( sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
   }
 };
 
-
-
 function detectCollision(obj) {
   if (
     cactus.dx + cactus.dWidth - 10 > obj.dx &&
@@ -101,7 +82,9 @@ function keydownHandler(e) {
 };
 
 function keyupHandler(e) {
+  if (gameOver) gameOver = false;
   keys[e.code] = false;
+  
 };
 
 function movementHandler() {
@@ -189,12 +172,15 @@ function render() {
 };
 
 function gameLoop() {
-  ctx.clearRect(0, 0, game.width, game.height);
-  render();
-  if (!paused) update();
-  else pause();
+  if (gameOver) {
+    startMenu();
+  } else {
+    ctx.clearRect(0, 0, game.width, game.height);
+    render();
+    if (!paused) update();
+    else pause();
+  }
   window.requestAnimationFrame(gameLoop);
-  
 };
 
 document.addEventListener('DOMContentLoaded', function () {
