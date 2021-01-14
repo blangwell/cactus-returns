@@ -46,6 +46,7 @@ let cactus = {
     }
   },
   jump() {
+    jumpSound.play();
     if (!this.sliding && !this.jumping) {
       this.jumping = true;
       let jumpAnimation = setInterval(() => {

@@ -7,8 +7,9 @@ const menuCtx = menuLayer.getContext('2d');
 const sampleSprite = document.getElementById('sample-sprite');
 const demonSprite = document.getElementById('demon-sprite');
 
-const goCactus = new Audio('./assets/go-cactus.wav')
-const themeMusic = new Audio('./assets/three-red-hearts-quiet.wav')
+const goCactus = new Audio('./assets/go-cactus.wav');
+const themeMusic = new Audio('./assets/three-red-hearts-quiet.wav');
+const jumpSound = new Audio('./assets/jump.wav')
 
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
