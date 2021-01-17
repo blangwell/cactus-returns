@@ -11,13 +11,13 @@ function startMenu() {
   ctx.textAlign = 'center';
   ctx.fillStyle = 'darkred';
   ctx.font = '30px Souls';
-  ctx.fillText("Move with the Arrow Keys", game.width / 2, game.height / 2 - 80);
-  ctx.fillText("Press P to Pause", game.width / 2, game.height / 2 - 30 );
+  ctx.fillText("Move with the Arrow Keys", game.width / 2, game.height / 2 - 90);
+  ctx.fillText("Press P to Pause", game.width / 2, game.height / 2 - 35 );
   ctx.font = '40px Souls';
   ctx.fillText("Spare Thine Enemies", game.width / 2, game.height / 2 + 30);
   ctx.font = '45px Souls';
   if (counter < 75) {
-    ctx.fillText("Press Return to Begin", game.width / 2, game.height / 2 + 90);
+    ctx.fillText("Press Return to Begin", game.width / 2, game.height / 2 + 100);
   }
 }
 
@@ -29,9 +29,10 @@ function pause() {
   ctx.fillRect(0, 0, game.width, game.height);
   ctx.strokeRect(0, 0, game.width, game.height);
   ctx.globalAlpha = 1;
-  ctx.fillStyle = 'rgb(255, 187, 0)';
-  ctx.font = '75px Barbarian';
+  ctx.fillStyle = 'darkred';
+  ctx.strokeStyle = 'black';
+  ctx.font = '100px BarbarianNS';
   ctx.textAlign = 'center';
-  ctx.fillText("Paused)", game.width / 2, game.height / 2 + 20);
-  ctx.strokeText("Paused)", game.width / 2, game.height / 2 + 20);
+  ctx.fillText("Paused)", game.width / 2 + 10, game.height / 2 + 50);
+  ctx.strokeText("Paused)", game.width / 2 + 10, game.height / 2 + 50);
 };

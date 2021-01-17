@@ -6,10 +6,12 @@ const bgCtx = bgLayer.getContext('2d');
 const menuCtx = menuLayer.getContext('2d');
 const sampleSprite = document.getElementById('sample-sprite');
 const demonSprite = document.getElementById('demon-sprite');
+const bigDemonSprite = document.getElementById('big-demon-sprite');
 
 const goCactus = new Audio('./assets/go-cactus.wav');
 const themeMusic = new Audio('./assets/three-red-hearts-quiet.wav');
-const jumpSound = new Audio('./assets/jump.wav')
+const jumpSound = new Audio('./assets/jump.wav');
+const hitSound = new Audio ('./assets/hit.wav');
 
 game.setAttribute('height', 400);
 game.setAttribute('width', 500);
@@ -22,13 +24,13 @@ let bgImage = new Image();
 bgImage.src = './assets/darkfantasyBg.jpg';
 let bgX = 0;
 let dude;
-let enemies = [new EnemySprite(0, 0, 16, 17, game.width, 325, 64, 64)];
+let enemies = [new EnemySprite(demonSprite, 0, 0, 16, 17, game.width, 325, 64, 64)];
 let gameOver = true;
 let keys = {};
 let paused = false;
 
-function EnemySprite(sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
-  this.spriteSheet = demonSprite;
+function EnemySprite(spritesheet, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+  this.spriteSheet = spritesheet;
   this.sx = sx;
   this.sy = sy;
   this.sWidth = sWidth;
@@ -55,21 +57,22 @@ function EnemySprite(sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
       this.sWidth, this.sHeight, this.dx, this.dy, this.dWidth, this.dHeight);
 
     if (this.ticker > spriteArray.length * 5) this.ticker = 0;
-
-    if (this.currentFrame > spriteArray.length) {
-      this.currentFrame = 0;
-    }
+    if (this.currentFrame > spriteArray.length) this.currentFrame = 0;
   }
 };
 
 function detectCollision(obj) {
   if (
-    cactus.dx + cactus.dWidth - 10 > obj.dx &&
-    cactus.dx + 10 < obj.dx + obj.dWidth &&
-    cactus.dy + cactus.dHeight > obj.dy &&
+    cactus.dx + cactus.dWidth - 30 > obj.dx &&
+    cactus.dx + 30 < obj.dx + obj.dWidth &&
+    cactus.dy + cactus.dHeight > obj.dy + 50 &&
     cactus.dy < obj.dy + obj.dHeight
   ) {
     console.log('COLLISION');
+    hitSound.loop = false;
+    hitSound.play();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+    ctx.fillRect(0, 0, game.width, game.height)
   }
 };
 
@@ -80,12 +83,14 @@ function keydownHandler(e) {
     goCactus.play();
   } 
   keys[e.code] = true;
-  if (keys.KeyP) {
+  if (keys.KeyP && !gameOver) {
     if (paused) {
       paused = false;
-      pause();
     }
-    else paused = true;
+    else {
+      pause();
+      paused = true;
+    } 
   }
 };
 
@@ -139,22 +144,16 @@ function rubberband() {
 };
 
 function spawnEnemies() {
-  let randomX = Math.floor(Math.random() * 200)
+  // let randomX = Math.floor(Math.random() * 200)
   enemies.forEach(enemy => {
     enemy.render();
     detectCollision(enemy);
-    enemy.x -= 5;
-    enemy.dx -= 5;
+    enemy.dx -= 5 ;
     if (enemy.dx < 0 - enemy.dWidth) {
       enemies.shift(); // remove once offscreen
-      enemies.push(new EnemySprite(0, 0, 16, 17, game.width, 325, 64, 64));
+      enemies.push(new EnemySprite(bigDemonSprite, 0, 0, 16, 24, game.width, 280, 64, 100));
     }
-    /* randomly generate enemies
-    there should be a space as wide as cactus.dx
-    between each enemy 
-    */
     
-
   });
 };
 
@@ -184,9 +183,13 @@ function gameLoop() {
   } else {
     ctx.clearRect(0, 0, game.width, game.height);
     render();
-    themeMusic.play();  
-    if (!paused) update();
-    else pause();
+    if (paused) {
+      themeMusic.pause()
+      pause();
+    } else {
+      update();
+      // themeMusic.play();  
+    }
   }
   window.requestAnimationFrame(gameLoop);
 };

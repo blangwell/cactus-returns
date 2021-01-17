@@ -17,20 +17,15 @@ body {
   margin: 10px 50px;
 }
 h1 {
-  font-family: 'Souls';
-  font-size: 50px;
-  padding: 0;
+  padding: 15px;
+  margin: 15px;
   text-align: center;
-}
-#cactus-title {
   font-family: 'BarbarianNS';
   font-size: 75px;
-  color: black;
-  -webkit-text-stroke: .1px darkred;
-}
-#returns-title {
-  position: relative;
-  top: -10px;
+  color: darkred;
+  -webkit-text-fill-color: black; /* Will override color (regardless of order) */
+  -webkit-text-stroke-width: .1px;
+  -webkit-text-stroke-color: darkred;
 }
 
 #canvas-layers {

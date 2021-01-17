@@ -65,7 +65,7 @@ let cactus = {
       cactus.sliding = true;
       // cactus.dy += Math.min(cactus.dHeight / 2);
       [cactus.dWidth, cactus.dHeight] = [cactus.dHeight, cactus.dWidth];
-      let slideDistance = cactus.dx + cactus.dWidth;
+      let slideDistance = cactus.dx + (cactus.dWidth * 1.5) ;
   
       let slideForward = setInterval(() => {
         if (cactus.dx <= slideDistance
