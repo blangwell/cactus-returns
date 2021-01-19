@@ -1,14 +1,10 @@
 @font-face {
-  font-family: 'Barbarian';
-  src: url('./assets/Barbarian.ttf')
-}
-@font-face {
-  font-family: 'Souls';
-  src: url('./assets/GaramondBold.ttf')
-}
-@font-face {
   font-family: 'BarbarianNS';
   src: url('./assets/BarbarianNS.ttf')
+}
+@font-face {
+  font-family: 'JMH';
+  src: url('./assets/jmh.ttf');
 }
 
 body {

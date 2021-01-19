@@ -30,7 +30,8 @@ let cactus = {
   ticker: 0,
 
   idleSprite: [2, 3],
-  jumpSprite: [4, 5, 6],
+  jumpSprite: [4],
+
   get fullSprite() {
     return [...Array(this.sColumns).keys()];
   },
@@ -38,12 +39,17 @@ let cactus = {
     // check if keys is empty or if all values are false, idle animate
     if (
       Object.keys(keys).length === 0 ||
-      Object.keys(keys).every(key => !keys[key])) {
+      Object.keys(keys).every(key => !keys[key]) ||
+      keys.ArrowRight) {
       this.update(this.fullSprite);
     }
     if (keys.ArrowUp) {
       this.update(this.jumpSprite);
     }
+    if (keys.ArrowLeft) {
+      this.update([0])
+    }
+
   },
   jump() {
     jumpSound.play();
